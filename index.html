@@ -1,0 +1,2018 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>BAPO Workspace</title>
+  <link rel="manifest" href="manifest.json" />
+  <style>
+    :root {
+      --bg-main: #ffffff;
+      --bg-sidebar: #fbfbfa;
+      --bg-hover: #f1f1ef;
+      --bg-active: #ebebea;
+      --border: #e5e5e3;
+      --text-main: #2c2c2c;
+      --text-muted: #787774;
+      --blue: #2383e2;
+      --red: #e03e3e;
+      --green: #0f7b6c;
+      --sidebar-w: 245px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: var(--bg-main);
+      color: var(--text-main);
+      overflow: hidden;
+    }
+
+    .app-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* SIDEBAR ESQUERDA EXATA */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: transform 0.2s ease, width 0.2s ease;
+      z-index: 40;
+    }
+
+    .sidebar.collapsed {
+      width: 0;
+      overflow: hidden;
+      border-right: none;
+    }
+
+    .brand-bar {
+      padding: 16px 16px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 15px;
+      color: #1f1f1f;
+    }
+
+    .brand-icon {
+      width: 24px;
+      height: 24px;
+      background: #1f1f1f;
+      color: #fff;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    /* Card Pomodoro */
+    .pomo-card {
+      margin: 0 12px 14px;
+      padding: 12px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      text-align: center;
+    }
+
+    .pomo-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .pomo-count-pill {
+      background: #f1f1ef;
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .pomo-topic-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--blue);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+
+    .pomo-timer-display {
+      font-size: 28px;
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+      color: #1f1f1f;
+    }
+
+    .pomo-actions {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-pomo-start {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-pomo-icon {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      width: 28px;
+      height: 28px;
+      cursor: pointer;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-pomo-icon:hover { background: var(--bg-hover); }
+
+    .sidebar-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 8px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 10px 8px 6px;
+      letter-spacing: 0.4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 6px;
+      font-size: 13.5px;
+      color: var(--text-main);
+      cursor: pointer;
+      margin-bottom: 2px;
+      user-select: none;
+    }
+
+    .nav-row:hover { background: var(--bg-hover); }
+    .nav-row.active {
+      background: var(--bg-active);
+      font-weight: 600;
+    }
+
+    .btn-new-page {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text-main);
+    }
+    .btn-new-page:hover { background: var(--bg-hover); }
+
+    .sidebar-footer {
+      padding: 10px 12px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-footer {
+      flex: 1;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+    .btn-footer:hover { background: var(--bg-hover); }
+
+    /* MAIN WORKSPACE */
+    .main-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      background: #ffffff;
+      min-width: 0;
+    }
+
+    /* TOPBAR EXATA */
+    .topbar {
+      height: 52px;
+      border-bottom: 1px solid var(--border);
+      padding: 0 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      background: #ffffff;
+      flex-shrink: 0;
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13.5px;
+      font-weight: 500;
+      min-width: 0;
+    }
+
+    .topbar-title-text {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .top-pill-btn {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 6px 12px;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-main);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .top-pill-btn:hover { background: var(--bg-hover); }
+    .top-pill-btn.active {
+      background: #f0f7ff;
+      border-color: var(--blue);
+      color: var(--blue);
+      font-weight: 600;
+    }
+
+    /* BARRA GLOBAL DE CANETA DIGITAL + IMPRESSÃO PARA TODAS AS PÁGINAS */
+    .pen-bar {
+      background: #f8fafc;
+      border-bottom: 1px solid var(--border);
+      padding: 6px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .pen-tools {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .color-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 1px #cbd5e1;
+      cursor: pointer;
+    }
+    .color-dot.selected {
+      box-shadow: 0 0 0 2px #1f1f1f;
+      transform: scale(1.1);
+    }
+
+    /* ÁREA FLUIDA DA WORKSPACE BRANCA */
+    .workspace-fluid {
+      flex: 1;
+      width: 100%;
+      overflow-y: auto;
+      padding: 32px 52px;
+      position: relative;
+    }
+
+    .fluid-canvas-wrap {
+      position: relative;
+      min-height: calc(100vh - 160px);
+      width: 100%;
+      background: #ffffff;
+    }
+
+    .page-header-area {
+      max-width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .page-doc-icon {
+      font-size: 38px;
+      margin-bottom: 12px;
+      display: inline-block;
+    }
+
+    .page-title-editable {
+      width: 100%;
+      font-size: 34px;
+      font-weight: 800;
+      border: none;
+      outline: none;
+      color: #2c2c2c;
+      background: transparent;
+      margin-bottom: 14px;
+    }
+
+    .page-title-editable::placeholder {
+      color: #c7c7c5;
+    }
+
+    .page-meta-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .btn-delete-page {
+      background: #fff;
+      border: 1px solid #f2c6c6;
+      color: var(--red);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 11.5px;
+      font-weight: 500;
+      cursor: pointer;
+      line-height: 1.2;
+      text-align: center;
+    }
+    .btn-delete-page:hover { background: #fff5f5; }
+
+    /* Faixa discreta de Pomodoros e Dias Agendados */
+    .gestao-status-strip {
+      background: #f8fafc;
+      border: 1px solid #dbeafe;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 12.5px;
+    }
+
+    .scheduled-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .sched-chip {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 99px;
+      padding: 3px 10px;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .sched-chip.done {
+      background: #dcfce7;
+      border-color: #86efac;
+      color: var(--green);
+      text-decoration: line-through;
+    }
+
+    /* Blocos de Conteúdo da Página Fluida */
+    .blocks-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .block-item {
+      width: 100%;
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .block-input {
+      width: 100%;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--text-main);
+      resize: none;
+      line-height: 1.6;
+    }
+
+    .block-text { font-size: 15px; min-height: 28px; }
+    .block-h1 { font-size: 24px; font-weight: 700; min-height: 36px; margin-top: 8px; }
+    .block-h2 { font-size: 19px; font-weight: 700; min-height: 30px; margin-top: 6px; }
+    .block-callout {
+      background: #f7f7f5;
+      border-left: 3px solid var(--blue);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 14.5px;
+    }
+
+    .block-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+      position: relative;
+      z-index: 20;
+    }
+
+    .btn-add-block {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 6px 12px;
+      font-size: 12.5px;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+    .btn-add-block:hover { background: var(--bg-hover); }
+
+    /* FOLHA A4 EXCLUSIVA PARA TÉCNICA FEYNMAN E TÉCNICA CORNELL */
+    .a4-workspace {
+      flex: 1;
+      background: #efefec;
+      overflow-y: auto;
+      padding: 20px 16px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .a4-controls-bar {
+      width: 210mm;
+      max-width: 100%;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 12.5px;
+    }
+
+    .a4-paper {
+      width: 210mm;
+      min-height: 297mm;
+      background: #ffffff;
+      border: 1px solid #d4d4d0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      padding: 14mm 15mm;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .a4-doc-header {
+      border-bottom: 2px solid #222;
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 12px;
+    }
+
+    .a4-doc-title {
+      font-size: 20px;
+      font-weight: 800;
+      border: none;
+      outline: none;
+      width: 100%;
+      color: #111;
+    }
+
+    .a4-doc-meta {
+      font-size: 11px;
+      color: #666;
+      white-space: nowrap;
+    }
+
+    .cornell-grid {
+      display: grid;
+      grid-template-columns: 32% 68%;
+      flex: 1;
+      border-bottom: 2px solid #222;
+      min-height: 195mm;
+    }
+
+    .cornell-left {
+      border-right: 2px solid #222;
+      padding-right: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cornell-right {
+      padding-left: 12px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cornell-bottom {
+      padding-top: 10px;
+      min-height: 48mm;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .feynman-sections {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .feynman-card {
+      border: 1px solid #d0d0cc;
+      border-radius: 6px;
+      padding: 10px 12px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .a4-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--blue);
+      margin-bottom: 6px;
+    }
+
+    .a4-lined-area {
+      width: 100%;
+      flex: 1;
+      border: none;
+      outline: none;
+      resize: none;
+      font-size: 13.5px;
+      line-height: 22px;
+      color: #222;
+      background-image: linear-gradient(transparent 95%, #f0f0ec 95%);
+      background-size: 100% 22px;
+    }
+
+    /* OVERLAY DE CANETA DIGITAL PARA TODAS AS PÁGINAS */
+    .stylus-overlay {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 15;
+    }
+    .stylus-overlay.active {
+      pointer-events: auto;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    /* KANBAN & CALENDÁRIO */
+    .kanban-board {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(220px, 1fr));
+      gap: 14px;
+      width: 100%;
+    }
+
+    .kanban-column {
+      background: var(--bg-sidebar);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .kanban-col-title {
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .k-item {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      cursor: pointer;
+    }
+    .k-item:hover { border-color: var(--blue); }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .cal-head {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      padding-bottom: 4px;
+    }
+
+    .cal-day {
+      min-height: 92px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px;
+      background: #fcfcfb;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .cal-day.today { border-color: var(--blue); background: #f5f9ff; }
+
+    .cal-badge {
+      font-size: 11px;
+      background: #e0f2fe;
+      color: #0369a1;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cal-badge.done {
+      background: #dcfce7;
+      color: var(--green);
+      text-decoration: line-through;
+    }
+
+    /* FLASHCARD (ESTILO ANKIDROID SM-2) */
+    .anki-wrap {
+      max-width: 820px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .anki-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 14px;
+    }
+
+    .anki-table th, .anki-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      font-size: 14px;
+    }
+
+    .anki-table th {
+      background: var(--bg-sidebar);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .c-new { color: var(--blue); font-weight: 700; }
+    .c-learn { color: var(--red); font-weight: 700; }
+    .c-due { color: var(--green); font-weight: 700; }
+
+    .anki-box {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      min-height: 360px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      margin-top: 14px;
+    }
+
+    .anki-btns {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .anki-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 12px 6px;
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    /* MODAL GESTÃO */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      font-size: 13px;
+    }
+
+    .modal-field input, .modal-field select {
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 13.5px;
+    }
+
+    /* IMPRESSÃO UNIVERSAL (PDF OU IMPRESSORA DO SISTEMA PARA QUALQUER PÁGINA) */
+    @media print {
+      html, body, .app-container, .main-wrapper, #main-content, .workspace-fluid, .a4-workspace {
+        height: auto !important;
+        overflow: visible !important;
+        background: #ffffff !important;
+      }
+      body * {
+        visibility: hidden;
+      }
+      .printable-area, .printable-area * {
+        visibility: visible;
+      }
+      .printable-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 12mm;
+        box-shadow: none !important;
+        border: none !important;
+      }
+      .a4-paper.printable-area {
+        width: 210mm;
+        min-height: 297mm;
+        padding: 12mm 14mm;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 820px) {
+      .sidebar {
+        position: fixed;
+        height: 100vh;
+        left: 0;
+        top: 0;
+      }
+      .sidebar.collapsed {
+        transform: translateX(-100%);
+        width: var(--sidebar-w);
+      }
+      .workspace-fluid { padding: 20px 18px; }
+      .kanban-board { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- SIDEBAR ESQUERDA -->
+    <aside class="sidebar no-print" id="sidebar">
+      <div class="brand-bar">
+        <div class="brand-icon">B</div>
+        <span>BAPO Workspace</span>
+      </div>
+
+      <!-- QUADRO POMODORO COM NOME DO TÓPICO ESTUDADO -->
+      <div class="pomo-card">
+        <div class="pomo-card-top">
+          <span id="pomo-mode-label">Foco (25m)</span>
+          <span class="pomo-count-pill" id="pomo-cycle-pill">0/10</span>
+        </div>
+        <div class="pomo-topic-label" id="pomo-topic-name" title="Tópico estudado">Página Inicial</div>
+        <div class="pomo-timer-display" id="pomo-display">25:00</div>
+        <div class="pomo-actions">
+          <button class="btn-pomo-start" onclick="togglePomodoro()" id="pomo-start-btn">▶ Iniciar</button>
+          <button class="btn-pomo-icon" onclick="resetPomodoro()" title="Reiniciar">↺</button>
+          <button class="btn-pomo-icon" onclick="switchPomodoroMode()" title="Alternar Foco / Pausa">⇄</button>
+        </div>
+      </div>
+
+      <div class="sidebar-body">
+        <!-- GESTÃO NA BARRA LATERAL -->
+        <div class="section-label">GESTÃO</div>
+        <div class="nav-row active" id="nav-home" onclick="openHomeWorkspace()">
+          <span>📄</span> <span>Página Inicial</span>
+        </div>
+        <div class="nav-row" id="nav-kanban" onclick="openView('kanban')">
+          <span>📋</span> <span>Quadro Kanban</span>
+        </div>
+        <div class="nav-row" id="nav-calendar" onclick="openView('calendar')">
+          <span>📅</span> <span>Calendário</span>
+        </div>
+
+        <!-- MINHAS PÁGINAS -->
+        <div class="section-label" style="margin-top: 12px;">
+          <span>MINHAS PÁGINAS</span>
+          <button class="btn-new-page" onclick="createNewPage()">+ Nova</button>
+        </div>
+        <div id="my-pages-list"></div>
+      </div>
+
+      <div class="sidebar-footer">
+        <button class="btn-footer" onclick="exportBackup()">💾 Backup</button>
+        <button class="btn-footer" onclick="document.getElementById('restore-input').click()">📁 Restaurar</button>
+        <input type="file" id="restore-input" accept=".json" style="display:none" onchange="importBackup(event)" />
+      </div>
+    </aside>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="main-wrapper">
+      <!-- TOPBAR EXATA -->
+      <header class="topbar no-print">
+        <div class="topbar-left">
+          <button class="btn-pomo-icon" onclick="toggleSidebar()" title="Menu">☰</button>
+          <span>📄</span>
+          <span class="topbar-title-text" id="topbar-title">Página Inicial</span>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="top-pill-btn" id="btn-gestao" onclick="openGestaoModal()">
+            Gestão
+          </button>
+          <button class="top-pill-btn" id="btn-top-flashcard" onclick="openView('flashcard')">
+            🗂️ Flashcard
+          </button>
+          <button class="top-pill-btn" id="btn-top-feynman" onclick="switchPageTemplate('feynman')">
+            🧠 Técnica Feynman
+          </button>
+          <button class="top-pill-btn" id="btn-top-cornell" onclick="switchPageTemplate('cornell')">
+            📐 Técnica Cornell
+          </button>
+        </div>
+      </header>
+
+      <!-- BARRA DE CANETA DIGITAL + IMPRESSÃO (PDF OU IMPRESSORA DO SISTEMA) -->
+      <div class="pen-bar no-print" id="global-pen-bar">
+        <div class="pen-tools">
+          <button class="top-pill-btn" id="btn-stylus-toggle" onclick="toggleStylus()">
+            ✍️ Caneta: Desativada
+          </button>
+          <div class="color-dot selected" style="background:#1d4ed8;" onclick="setPenColor('#1d4ed8', this)" title="Azul"></div>
+          <div class="color-dot" style="background:#1f1f1f;" onclick="setPenColor('#1f1f1f', this)" title="Preto"></div>
+          <div class="color-dot" style="background:#e03e3e;" onclick="setPenColor('#e03e3e', this)" title="Vermelho"></div>
+          <div class="color-dot" style="background:#0f7b6c;" onclick="setPenColor('#0f7b6c', this)" title="Verde"></div>
+          <select id="pen-size-select" onchange="setPenSize(this.value)" style="padding:4px 6px;border:1px solid var(--border);border-radius:6px;font-size:12px;">
+            <option value="2">Fina (2px)</option>
+            <option value="4">Média (4px)</option>
+            <option value="8">Marca-texto (8px)</option>
+          </select>
+          <button class="top-pill-btn" onclick="toggleEraser()" id="btn-eraser">🧽 Borracha</button>
+          <button class="top-pill-btn" onclick="clearCanvas()">🧹 Limpar Traços</button>
+        </div>
+
+        <button class="top-pill-btn" onclick="printCurrentPage()" title="Imprimir ou Salvar como PDF">
+          🖨️ Imprimir / PDF
+        </button>
+      </div>
+
+      <!-- CONTEÚDO -->
+      <div id="main-content" style="flex:1; display:flex; flex-direction:column; overflow:hidden;"></div>
+    </main>
+  </div>
+
+  <!-- MODAL GESTÃO: CONFIGURAR QUANTIDADE DE POMODOROS, DATA E QUADRO KANBAN/CALENDÁRIO -->
+  <div class="modal-backdrop no-print" id="gestao-modal">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h3 style="font-size:16px;">Gestão da Página (Pomodoro, Kanban & Calendário)</h3>
+        <button class="btn-pomo-icon" onclick="closeGestaoModal()">✕</button>
+      </div>
+
+      <div class="modal-field">
+        <label><strong>Quantidade de Pomodoros a serem executados nesta página:</strong></label>
+        <input type="number" id="modal-pomo-target" min="1" max="30" value="2" />
+      </div>
+
+      <div class="modal-field">
+        <label><strong>Coluna no Quadro Kanban:</strong></label>
+        <select id="modal-kanban-col">
+          <option value="todo">A Estudar</option>
+          <option value="doing">Em Andamento</option>
+          <option value="review">Revisão</option>
+          <option value="done">Concluído</option>
+        </select>
+      </div>
+
+      <div class="modal-field">
+        <label><strong>Data estabelecida para execução (Calendário & Página):</strong></label>
+        <div style="display:flex;gap:6px;">
+          <input type="date" id="modal-sched-date" style="flex:1;" />
+          <select id="modal-sched-type">
+            <option value="Estudo">Estudo</option>
+            <option value="Revisão 24h">Revisão 24h</option>
+            <option value="Revisão 7d">Revisão 7d</option>
+            <option value="Revisão 30d">Revisão 30d</option>
+          </select>
+          <button class="btn-pomo-start" onclick="addScheduleFromModal()">+ Incluir</button>
+        </div>
+      </div>
+
+      <div id="modal-scheduled-list" class="scheduled-tags"></div>
+
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px;">
+        <button class="top-pill-btn" onclick="closeGestaoModal()">Fechar</button>
+        <button class="btn-pomo-start" onclick="saveGestaoModal()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'bapo_workspace_v5';
+
+    const initialState = {
+      currentView: 'page', // 'page' | 'kanban' | 'calendar' | 'flashcard'
+      activePageId: 'home_page',
+      pomodoro: {
+        seconds: 25 * 60,
+        running: false,
+        mode: 'focus' // 'focus' | 'break'
+      },
+      pages: [
+        {
+          id: 'home_page',
+          isHome: true,
+          title: '',
+          template: 'fluid', // 'fluid' | 'feynman' | 'cornell'
+          inGestao: false,
+          kanbanStatus: 'todo',
+          pomoTarget: 10,
+          pomoDone: 0,
+          scheduledDates: [],
+          blocks: [],
+          cornell: { cues: '', notes: '', summary: '' },
+          feynman: { concept: '', simple: '', gaps: '', analogy: '' },
+          drawingFluid: '',
+          drawingCornell: '',
+          drawingFeynman: ''
+        }
+      ],
+      decks: [
+        { id: 'd_geral', name: 'Geral' }
+      ],
+      cards: []
+    };
+
+    let state = loadState();
+    let timerId = null;
+    let studySession = null;
+
+    // Estado da Caneta Digital (disponível em todas as páginas)
+    let stylusEnabled = false;
+    let penColor = '#1d4ed8';
+    let penSize = 2;
+    let isEraser = false;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return JSON.parse(JSON.stringify(initialState));
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      syncPomodoroUI();
+    }
+
+    function getActivePage() {
+      return state.pages.find(p => p.id === state.activePageId) || state.pages[0];
+    }
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('collapsed');
+    }
+
+    // ==========================================
+    // IMPRESSÃO (PDF OU IMPRESSORA DO SISTEMA)
+    // ==========================================
+    function printCurrentPage() {
+      // Converte temporariamente o canvas da caneta em imagem para garantir saída nítida na impressão/PDF
+      const canvas = document.getElementById('stylus-canvas');
+      let tempImg = null;
+      if (canvas) {
+        tempImg = document.createElement('img');
+        tempImg.src = canvas.toDataURL('image/png');
+        tempImg.style.position = 'absolute';
+        tempImg.style.inset = '0';
+        tempImg.style.width = '100%';
+        tempImg.style.height = '100%';
+        tempImg.style.pointerEvents = 'none';
+        tempImg.style.zIndex = '16';
+        canvas.parentElement.appendChild(tempImg);
+      }
+
+      window.print();
+
+      if (tempImg && tempImg.parentElement) {
+        tempImg.parentElement.removeChild(tempImg);
+      }
+    }
+
+    // ==========================================
+    // CONTROLES DA CANETA DIGITAL (TODAS AS PÁGINAS)
+    // ==========================================
+    function toggleStylus() {
+      stylusEnabled = !stylusEnabled;
+      isEraser = false;
+      updatePenToolbarUI();
+    }
+
+    function setPenColor(color, el) {
+      penColor = color;
+      isEraser = false;
+      if (!stylusEnabled) stylusEnabled = true;
+      document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('selected'));
+      if (el) el.classList.add('selected');
+      updatePenToolbarUI();
+    }
+
+    function setPenSize(size) {
+      penSize = parseInt(size, 10) || 2;
+      isEraser = false;
+      if (!stylusEnabled) stylusEnabled = true;
+      updatePenToolbarUI();
+    }
+
+    function toggleEraser() {
+      if (!stylusEnabled) stylusEnabled = true;
+      isEraser = !isEraser;
+      updatePenToolbarUI();
+    }
+
+    function updatePenToolbarUI() {
+      const btn = document.getElementById('btn-stylus-toggle');
+      const eraserBtn = document.getElementById('btn-eraser');
+      const canvas = document.getElementById('stylus-canvas');
+      if (btn) {
+        btn.textContent = stylusEnabled ? '✍️ Caneta: Ativa' : '✍️ Caneta: Desativada';
+        btn.classList.toggle('active', stylusEnabled);
+      }
+      if (eraserBtn) {
+        eraserBtn.classList.toggle('active', isEraser && stylusEnabled);
+      }
+      if (canvas) {
+        canvas.classList.toggle('active', stylusEnabled);
+      }
+    }
+
+    function getDrawingKey(page) {
+      if (page.template === 'cornell') return 'drawingCornell';
+      if (page.template === 'feynman') return 'drawingFeynman';
+      return 'drawingFluid';
+    }
+
+    function setupStylusCanvas(containerEl, page) {
+      const canvas = document.getElementById('stylus-canvas');
+      if (!containerEl || !canvas) return;
+
+      canvas.width = containerEl.offsetWidth;
+      canvas.height = Math.max(containerEl.offsetHeight, 650);
+      const ctx = canvas.getContext('2d');
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      const key = getDrawingKey(page);
+      if (page[key]) {
+        const img = new Image();
+        img.onload = () => ctx.drawImage(img, 0, 0);
+        img.src = page[key];
+      }
+
+      let drawing = false;
+      const getCoords = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+      };
+
+      const startDraw = (e) => {
+        if (!stylusEnabled) return;
+        drawing = true;
+        const c = getCoords(e);
+        ctx.beginPath();
+        ctx.moveTo(c.x, c.y);
+      };
+
+      const moveDraw = (e) => {
+        if (!drawing || !stylusEnabled) return;
+        if (e.cancelable) e.preventDefault();
+        const c = getCoords(e);
+        if (isEraser) {
+          ctx.globalCompositeOperation = 'destination-out';
+          ctx.lineWidth = 18;
+        } else {
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.strokeStyle = penColor;
+          ctx.lineWidth = penSize;
+          ctx.globalAlpha = penSize >= 8 ? 0.35 : 1.0;
+        }
+        ctx.lineTo(c.x, c.y);
+        ctx.stroke();
+      };
+
+      const endDraw = () => {
+        if (!drawing) return;
+        drawing = false;
+        ctx.globalAlpha = 1.0;
+        ctx.globalCompositeOperation = 'source-over';
+        page[key] = canvas.toDataURL();
+        saveState();
+      };
+
+      canvas.onmousedown = startDraw;
+      canvas.onmousemove = moveDraw;
+      window.onmouseup = endDraw;
+
+      canvas.ontouchstart = startDraw;
+      canvas.ontouchmove = moveDraw;
+      window.ontouchend = endDraw;
+
+      updatePenToolbarUI();
+    }
+
+    function clearCanvas() {
+      const p = getActivePage();
+      const c = document.getElementById('stylus-canvas');
+      if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height);
+      if (p) {
+        p[getDrawingKey(p)] = '';
+        saveState();
+      }
+    }
+
+    // ==========================================
+    // POMODORO COM TÓPICO DA PÁGINA ATIVA
+    // ==========================================
+    function formatMMSS(sec) {
+      const m = String(Math.floor(sec / 60)).padStart(2, '0');
+      const s = String(sec % 60).padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function syncPomodoroUI() {
+      const page = getActivePage();
+      const displayTitle = page ? (page.title.trim() || (page.isHome ? 'Página Inicial' : 'Sem título')) : 'Página Inicial';
+      document.getElementById('pomo-topic-name').textContent = displayTitle;
+      document.getElementById('pomo-display').textContent = formatMMSS(state.pomodoro.seconds);
+      document.getElementById('pomo-mode-label').textContent = state.pomodoro.mode === 'focus' ? 'Foco (25m)' : 'Pausa (5m)';
+      document.getElementById('pomo-cycle-pill').textContent = page ? `${page.pomoDone}/${page.pomoTarget}` : '0/10';
+      document.getElementById('pomo-start-btn').textContent = state.pomodoro.running ? '⏸ Pausar' : '▶ Iniciar';
+    }
+
+    function togglePomodoro() {
+      if (state.pomodoro.running) {
+        clearInterval(timerId);
+        state.pomodoro.running = false;
+      } else {
+        state.pomodoro.running = true;
+        timerId = setInterval(() => {
+          if (state.pomodoro.seconds > 0) {
+            state.pomodoro.seconds--;
+            syncPomodoroUI();
+          } else {
+            clearInterval(timerId);
+            state.pomodoro.running = false;
+            if (state.pomodoro.mode === 'focus') {
+              const p = getActivePage();
+              if (p) p.pomoDone = (p.pomoDone || 0) + 1;
+              alert('🍅 Pomodoro concluído! Ciclo contabilizado no tópico estudado.');
+              state.pomodoro.mode = 'break';
+              state.pomodoro.seconds = 5 * 60;
+            } else {
+              alert('☕ Pausa encerrada! Voltando ao modo Foco.');
+              state.pomodoro.mode = 'focus';
+              state.pomodoro.seconds = 25 * 60;
+            }
+            saveState();
+            renderApp();
+          }
+        }, 1000);
+      }
+      saveState();
+    }
+
+    function resetPomodoro() {
+      clearInterval(timerId);
+      state.pomodoro.running = false;
+      state.pomodoro.seconds = state.pomodoro.mode === 'focus' ? 25 * 60 : 5 * 60;
+      saveState();
+    }
+
+    function switchPomodoroMode() {
+      clearInterval(timerId);
+      state.pomodoro.running = false;
+      state.pomodoro.mode = state.pomodoro.mode === 'focus' ? 'break' : 'focus';
+      state.pomodoro.seconds = state.pomodoro.mode === 'focus' ? 25 * 60 : 5 * 60;
+      saveState();
+    }
+
+    // ==========================================
+    // NAVEGAÇÃO
+    // ==========================================
+    function openHomeWorkspace() {
+      state.currentView = 'page';
+      state.activePageId = 'home_page';
+      saveState();
+      renderApp();
+    }
+
+    function openPage(pageId) {
+      state.currentView = 'page';
+      state.activePageId = pageId;
+      saveState();
+      renderApp();
+    }
+
+    function openView(view) {
+      state.currentView = view;
+      saveState();
+      renderApp();
+    }
+
+    function createNewPage() {
+      const newPage = {
+        id: 'page_' + Date.now(),
+        isHome: false,
+        title: '',
+        template: 'fluid',
+        inGestao: false,
+        kanbanStatus: 'todo',
+        pomoTarget: 2,
+        pomoDone: 0,
+        scheduledDates: [],
+        blocks: [],
+        cornell: { cues: '', notes: '', summary: '' },
+        feynman: { concept: '', simple: '', gaps: '', analogy: '' },
+        drawingFluid: '',
+        drawingCornell: '',
+        drawingFeynman: ''
+      };
+      state.pages.push(newPage);
+      openPage(newPage.id);
+    }
+
+    function deleteCurrentPage(pageId) {
+      if (pageId === 'home_page') {
+        const home = getActivePage();
+        home.title = '';
+        home.blocks = [];
+        home.cornell = { cues: '', notes: '', summary: '' };
+        home.feynman = { concept: '', simple: '', gaps: '', analogy: '' };
+        home.scheduledDates = [];
+        home.inGestao = false;
+        home.template = 'fluid';
+        home.drawingFluid = '';
+        home.drawingCornell = '';
+        home.drawingFeynman = '';
+        saveState();
+        renderApp();
+        return;
+      }
+      state.pages = state.pages.filter(p => p.id !== pageId);
+      state.activePageId = 'home_page';
+      state.currentView = 'page';
+      saveState();
+      renderApp();
+    }
+
+    function switchPageTemplate(targetTemplate) {
+      const p = getActivePage();
+      if (!p) return;
+      if (state.currentView !== 'page') {
+        state.currentView = 'page';
+      }
+      p.template = p.template === targetTemplate ? 'fluid' : targetTemplate;
+      saveState();
+      renderApp();
+    }
+
+    // ==========================================
+    // MODAL GESTÃO
+    // ==========================================
+    function openGestaoModal() {
+      const p = getActivePage();
+      if (!p) return;
+      document.getElementById('modal-pomo-target').value = p.pomoTarget || 2;
+      document.getElementById('modal-kanban-col').value = p.kanbanStatus || 'todo';
+      document.getElementById('modal-sched-date').value = new Date().toISOString().slice(0, 10);
+      renderModalScheduledList();
+      document.getElementById('gestao-modal').classList.add('open');
+    }
+
+    function closeGestaoModal() {
+      document.getElementById('gestao-modal').classList.remove('open');
+    }
+
+    function renderModalScheduledList() {
+      const p = getActivePage();
+      const box = document.getElementById('modal-scheduled-list');
+      if (!p || p.scheduledDates.length === 0) {
+        box.innerHTML = '<span style="font-size:12px;color:#787774;">Nenhuma data incluída ainda.</span>';
+        return;
+      }
+      box.innerHTML = p.scheduledDates.map((item, idx) => `
+        <span class="sched-chip ${item.done ? 'done' : ''}">
+          📅 ${item.date.split('-').reverse().join('/')} (${item.label}) • 🍅 ${p.pomoTarget}
+          <span style="color:#e03e3e;margin-left:4px;cursor:pointer;" onclick="removeSchedDate(${idx})">×</span>
+        </span>
+      `).join('');
+    }
+
+    function addScheduleFromModal() {
+      const p = getActivePage();
+      const d = document.getElementById('modal-sched-date').value;
+      const t = document.getElementById('modal-sched-type').value;
+      const targetPomos = Math.max(1, parseInt(document.getElementById('modal-pomo-target').value, 10) || 1);
+      if (!p || !d) return;
+      p.pomoTarget = targetPomos;
+      p.scheduledDates.push({ date: d, label: t, pomos: targetPomos, done: false });
+      p.scheduledDates.sort((a, b) => a.date.localeCompare(b.date));
+      p.inGestao = true;
+      saveState();
+      renderModalScheduledList();
+    }
+
+    function removeSchedDate(idx) {
+      const p = getActivePage();
+      if (!p) return;
+      p.scheduledDates.splice(idx, 1);
+      saveState();
+      renderModalScheduledList();
+      renderApp();
+    }
+
+    function toggleSchedDone(idx) {
+      const p = getActivePage();
+      if (!p || !p.scheduledDates[idx]) return;
+      p.scheduledDates[idx].done = !p.scheduledDates[idx].done;
+      saveState();
+      renderApp();
+    }
+
+    function saveGestaoModal() {
+      const p = getActivePage();
+      if (!p) return;
+      p.pomoTarget = Math.max(1, parseInt(document.getElementById('modal-pomo-target').value, 10) || 1);
+      p.kanbanStatus = document.getElementById('modal-kanban-col').value;
+      p.scheduledDates.forEach(sd => sd.pomos = p.pomoTarget);
+      p.inGestao = true;
+      saveState();
+      closeGestaoModal();
+      renderApp();
+    }
+
+    // ==========================================
+    // RENDERIZAÇÃO PRINCIPAL
+    // ==========================================
+    function renderApp() {
+      syncPomodoroUI();
+
+      document.getElementById('nav-home').classList.toggle('active', state.currentView === 'page' && state.activePageId === 'home_page');
+      document.getElementById('nav-kanban').classList.toggle('active', state.currentView === 'kanban');
+      document.getElementById('nav-calendar').classList.toggle('active', state.currentView === 'calendar');
+
+      const pagesListEl = document.getElementById('my-pages-list');
+      pagesListEl.innerHTML = '';
+      state.pages.filter(p => !p.isHome).forEach(p => {
+        const div = document.createElement('div');
+        div.className = 'nav-row' + (state.currentView === 'page' && state.activePageId === p.id ? ' active' : '');
+        div.innerHTML = `<span>📄</span> <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.title.trim() || 'Sem título'}</span>`;
+        div.onclick = () => openPage(p.id);
+        pagesListEl.appendChild(div);
+      });
+
+      const activePage = getActivePage();
+      const topTitleEl = document.getElementById('topbar-title');
+      const btnGestao = document.getElementById('btn-gestao');
+      const btnFlash = document.getElementById('btn-top-flashcard');
+      const btnFeynman = document.getElementById('btn-top-feynman');
+      const btnCornell = document.getElementById('btn-top-cornell');
+      const penBar = document.getElementById('global-pen-bar');
+
+      btnFlash.classList.toggle('active', state.currentView === 'flashcard');
+      btnFeynman.classList.toggle('active', state.currentView === 'page' && activePage.template === 'feynman');
+      btnCornell.classList.toggle('active', state.currentView === 'page' && activePage.template === 'cornell');
+      btnGestao.classList.toggle('active', activePage && activePage.inGestao);
+
+      if (penBar) penBar.style.display = state.currentView === 'page' ? 'flex' : 'none';
+
+      const container = document.getElementById('main-content');
+
+      if (state.currentView === 'kanban') {
+        topTitleEl.textContent = 'Quadro Kanban';
+        renderKanban(container);
+      } else if (state.currentView === 'calendar') {
+        topTitleEl.textContent = 'Calendário';
+        renderCalendar(container);
+      } else if (state.currentView === 'flashcard') {
+        topTitleEl.textContent = 'Flashcard';
+        renderFlashcard(container);
+      } else {
+        topTitleEl.textContent = activePage.title.trim() || (activePage.isHome ? 'Página Inicial' : 'Sem título');
+        renderPage(container, activePage);
+      }
+    }
+
+    // ------------------------------------------
+    // RENDER DA PÁGINA (FLUIDA vs A4 FEYNMAN/CORNELL) + CANETA + IMPRESSÃO
+    // ------------------------------------------
+    function renderPage(container, page) {
+      const gestaoStripHTML = (page.inGestao || page.scheduledDates.length > 0) ? `
+        <div class="gestao-status-strip no-print">
+          <div>
+            <strong>🍅 Pomodoros:</strong> ${page.pomoDone}/${page.pomoTarget} • 
+            <strong>📋 Kanban:</strong> ${statusLabel(page.kanbanStatus)}
+          </div>
+          <div class="scheduled-tags">
+            <span><strong>📅 Datas agendadas:</strong></span>
+            ${page.scheduledDates.length === 0 ? '<span>Nenhuma</span>' : page.scheduledDates.map((sd, i) => `
+              <span class="sched-chip ${sd.done ? 'done' : ''}" onclick="toggleSchedDone(${i})" title="Clique para marcar concluído">
+                ${sd.done ? '✅' : '🗓️'} ${sd.date.split('-').reverse().join('/')} (${sd.label} • ${sd.pomos || page.pomoTarget}🍅)
+              </span>
+            `).join('')}
+          </div>
+        </div>
+      ` : '';
+
+      // 1. WORKSPACE FLUIDA (COM CANETA E IMPRESSÃO HABILITADAS)
+      if (page.template === 'fluid') {
+        let blocksHTML = '';
+        page.blocks.forEach((b, idx) => {
+          if (b.type === 'todo') {
+            blocksHTML += `
+              <div class="block-item">
+                <input type="checkbox" ${b.checked ? 'checked' : ''} onchange="toggleBlockCheck(${idx})" style="margin-top:6px;" />
+                <input class="block-input block-text" style="${b.checked ? 'text-decoration:line-through;color:#888;' : ''}" value="${escapeHtml(b.text)}" oninput="updateBlockText(${idx}, this.value)" placeholder="Tarefa..." />
+              </div>
+            `;
+          } else {
+            const cls = b.type === 'h1' ? 'block-h1' : (b.type === 'h2' ? 'block-h2' : (b.type === 'callout' ? 'block-callout' : 'block-text'));
+            blocksHTML += `
+              <div class="block-item">
+                <textarea class="block-input ${cls}" rows="1" oninput="autoResize(this); updateBlockText(${idx}, this.value)" placeholder="Digite aqui...">${escapeHtml(b.text)}</textarea>
+              </div>
+            `;
+          }
+        });
+
+        container.innerHTML = `
+          <div class="workspace-fluid">
+            <div class="fluid-canvas-wrap printable-area" id="fluid-canvas-wrap">
+              <canvas class="stylus-overlay ${stylusEnabled ? 'active' : ''}" id="stylus-canvas"></canvas>
+              <div class="page-header-area">
+                <div class="page-doc-icon no-print">📄</div>
+                <input class="page-title-editable" value="${escapeHtml(page.title)}" oninput="updateTitle(this.value)" placeholder="Sem título" />
+                <div class="page-meta-bar no-print">
+                  <span>Workspace Branca • Salvamento Automático</span>
+                  <button class="btn-delete-page" onclick="deleteCurrentPage('${page.id}')">Excluir<br>página</button>
+                </div>
+                ${gestaoStripHTML}
+              </div>
+
+              <div class="blocks-container">${blocksHTML}</div>
+
+              <div class="block-toolbar no-print">
+                <button class="btn-add-block" onclick="addBlock('text')">+ Texto</button>
+                <button class="btn-add-block" onclick="addBlock('h1')">+ Título 1</button>
+                <button class="btn-add-block" onclick="addBlock('h2')">+ Título 2</button>
+                <button class="btn-add-block" onclick="addBlock('todo')">+ Tarefa</button>
+                <button class="btn-add-block" onclick="addBlock('callout')">+ Destaque</button>
+              </div>
+            </div>
+          </div>
+        `;
+        setupStylusCanvas(document.getElementById('fluid-canvas-wrap'), page);
+        return;
+      }
+
+      // 2. FOLHA A4 EXCLUSIVA PARA TÉCNICA FEYNMAN E TÉCNICA CORNELL
+      let a4BodyHTML = '';
+      if (page.template === 'cornell') {
+        a4BodyHTML = `
+          <div class="cornell-grid">
+            <div class="cornell-left">
+              <div class="a4-label">Palavras-Chave / Perguntas</div>
+              <textarea class="a4-lined-area" oninput="updateCornell('cues', this.value)" placeholder="Tópicos e perguntas de revisão...">${escapeHtml(page.cornell.cues)}</textarea>
+            </div>
+            <div class="cornell-right">
+              <div class="a4-label">Anotações & Frases Atômicas</div>
+              <textarea class="a4-lined-area" oninput="updateCornell('notes', this.value)" placeholder="Anotações estruturadas da aula ou leitura...">${escapeHtml(page.cornell.notes)}</textarea>
+            </div>
+          </div>
+          <div class="cornell-bottom">
+            <div class="a4-label">Síntese (Resumo Final)</div>
+            <textarea class="a4-lined-area" oninput="updateCornell('summary', this.value)" placeholder="Resumo com suas próprias palavras...">${escapeHtml(page.cornell.summary)}</textarea>
+          </div>
+        `;
+      } else {
+        a4BodyHTML = `
+          <div class="feynman-sections">
+            <div class="feynman-card">
+              <div class="a4-label">1. Conceito Estudado</div>
+              <textarea class="a4-lined-area" oninput="updateFeynman('concept', this.value)" placeholder="Defina o tema central...">${escapeHtml(page.feynman.concept)}</textarea>
+            </div>
+            <div class="feynman-card">
+              <div class="a4-label">2. Explicação Simples (Como ensinar a uma criança)</div>
+              <textarea class="a4-lined-area" oninput="updateFeynman('simple', this.value)" placeholder="Explique de forma clara e sem jargões...">${escapeHtml(page.feynman.simple)}</textarea>
+            </div>
+            <div class="feynman-card">
+              <div class="a4-label">3. Lacunas Identificadas (Onde travei)</div>
+              <textarea class="a4-lined-area" oninput="updateFeynman('gaps', this.value)" placeholder="Pontos que precisam ser revisados na fonte...">${escapeHtml(page.feynman.gaps)}</textarea>
+            </div>
+            <div class="feynman-card">
+              <div class="a4-label">4. Analogias & Exemplos</div>
+              <textarea class="a4-lined-area" oninput="updateFeynman('analogy', this.value)" placeholder="Crie uma analogia prática...">${escapeHtml(page.feynman.analogy)}</textarea>
+            </div>
+          </div>
+        `;
+      }
+
+      container.innerHTML = `
+        <div class="a4-workspace">
+          <div style="width:210mm;max-width:100%;" class="no-print">${gestaoStripHTML}</div>
+
+          <div class="a4-controls-bar no-print">
+            <strong>Folha A4 • ${page.template === 'cornell' ? 'Técnica Cornell' : 'Técnica Feynman'}</strong>
+            <div style="display:flex;gap:6px;">
+              <button class="top-pill-btn" onclick="switchPageTemplate('${page.template}')">Voltar à Página Fluida</button>
+              <button class="btn-pomo-start" onclick="printCurrentPage()">🖨️ Imprimir / PDF A4</button>
+            </div>
+          </div>
+
+          <div class="a4-paper printable-area" id="a4-paper">
+            <canvas class="stylus-overlay ${stylusEnabled ? 'active' : ''}" id="stylus-canvas"></canvas>
+            <div class="a4-doc-header">
+              <input class="a4-doc-title" value="${escapeHtml(page.title)}" oninput="updateTitle(this.value)" placeholder="Sem título" />
+              <div class="a4-doc-meta">🍅 ${page.pomoDone}/${page.pomoTarget}</div>
+            </div>
+            ${a4BodyHTML}
+          </div>
+        </div>
+      `;
+
+      setupStylusCanvas(document.getElementById('a4-paper'), page);
+    }
+
+    function statusLabel(st) {
+      return { todo: 'A Estudar', doing: 'Em Andamento', review: 'Revisão', done: 'Concluído' }[st] || 'A Estudar';
+    }
+
+    function updateTitle(val) {
+      const p = getActivePage();
+      if (!p) return;
+      p.title = val;
+      document.getElementById('topbar-title').textContent = val.trim() || (p.isHome ? 'Página Inicial' : 'Sem título');
+      saveState();
+      const pagesListEl = document.getElementById('my-pages-list');
+      pagesListEl.innerHTML = '';
+      state.pages.filter(item => !item.isHome).forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'nav-row' + (state.activePageId === item.id ? ' active' : '');
+        div.innerHTML = `<span>📄</span> <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.title.trim() || 'Sem título'}</span>`;
+        div.onclick = () => openPage(item.id);
+        pagesListEl.appendChild(div);
+      });
+    }
+
+    function addBlock(type) {
+      const p = getActivePage();
+      if (!p) return;
+      p.blocks.push({ type, text: '', checked: false });
+      saveState();
+      renderApp();
+    }
+
+    function updateBlockText(idx, val) {
+      const p = getActivePage();
+      if (p && p.blocks[idx]) {
+        p.blocks[idx].text = val;
+        saveState();
+      }
+    }
+
+    function toggleBlockCheck(idx) {
+      const p = getActivePage();
+      if (p && p.blocks[idx]) {
+        p.blocks[idx].checked = !p.blocks[idx].checked;
+        saveState();
+        renderApp();
+      }
+    }
+
+    function autoResize(el) {
+      el.style.height = 'auto';
+      el.style.height = el.scrollHeight + 'px';
+    }
+
+    function updateCornell(field, val) {
+      const p = getActivePage();
+      if (p) { p.cornell[field] = val; saveState(); }
+    }
+
+    function updateFeynman(field, val) {
+      const p = getActivePage();
+      if (p) { p.feynman[field] = val; saveState(); }
+    }
+
+    // ------------------------------------------
+    // QUADRO KANBAN
+    // ------------------------------------------
+    function renderKanban(container) {
+      const cols = [
+        { id: 'todo', title: '📌 A Estudar' },
+        { id: 'doing', title: '🔥 Em Andamento' },
+        { id: 'review', title: '🔁 Revisão' },
+        { id: 'done', title: '✅ Concluído' }
+      ];
+
+      const gestaoPages = state.pages.filter(p => p.inGestao || p.scheduledDates.length > 0);
+
+      let html = '<div class="workspace-fluid"><h2 style="font-size:22px;margin-bottom:14px;">📋 Quadro Kanban</h2><div class="kanban-board">';
+      cols.forEach(c => {
+        const items = gestaoPages.filter(p => p.kanbanStatus === c.id);
+        html += `<div class="kanban-column"><div class="kanban-col-title"><span>${c.title}</span><span>${items.length}</span></div>`;
+        items.forEach(item => {
+          const title = item.title.trim() || (item.isHome ? 'Página Inicial' : 'Sem título');
+          html += `
+            <div class="k-item" onclick="openPage('${item.id}')">
+              <div style="font-weight:600;font-size:14px;margin-bottom:6px;">${escapeHtml(title)}</div>
+              <div style="display:flex;justify-content:space-between;font-size:11.5px;color:#787774;margin-bottom:6px;">
+                <span>🍅 ${item.pomoDone}/${item.pomoTarget}</span>
+                <span>📅 ${item.scheduledDates.length} dia(s)</span>
+              </div>
+              <select onclick="event.stopPropagation()" onchange="changeKanbanCol('${item.id}', this.value)" style="width:100%;padding:4px;border-radius:4px;border:1px solid #ddd;font-size:11.5px;">
+                <option value="todo" ${item.kanbanStatus==='todo'?'selected':''}>A Estudar</option>
+                <option value="doing" ${item.kanbanStatus==='doing'?'selected':''}>Em Andamento</option>
+                <option value="review" ${item.kanbanStatus==='review'?'selected':''}>Revisão</option>
+                <option value="done" ${item.kanbanStatus==='done'?'selected':''}>Concluído</option>
+              </select>
+            </div>
+          `;
+        });
+        html += '</div>';
+      });
+      html += '</div></div>';
+      container.innerHTML = html;
+    }
+
+    function changeKanbanCol(pageId, status) {
+      const p = state.pages.find(x => x.id === pageId);
+      if (p) { p.kanbanStatus = status; saveState(); renderApp(); }
+    }
+
+    // ------------------------------------------
+    // CALENDÁRIO
+    // ------------------------------------------
+    function renderCalendar(container) {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = now.getMonth();
+      const first = new Date(y, m, 1).getDay();
+      const days = new Date(y, m + 1, 0).getDate();
+      const todayStr = now.toISOString().slice(0, 10);
+      const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+      let grid = `
+        <div class="cal-head">Dom</div><div class="cal-head">Seg</div><div class="cal-head">Ter</div>
+        <div class="cal-head">Qua</div><div class="cal-head">Qui</div><div class="cal-head">Sex</div><div class="cal-head">Sáb</div>
+      `;
+      for (let i = 0; i < first; i++) grid += `<div class="cal-day" style="background:#f5f5f3;"></div>`;
+
+      for (let d = 1; d <= days; d++) {
+        const ds = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        let badges = '';
+        state.pages.forEach(p => {
+          const title = p.title.trim() || (p.isHome ? 'Página Inicial' : 'Sem título');
+          p.scheduledDates.forEach(sd => {
+            if (sd.date === ds) {
+              badges += `<div class="cal-badge ${sd.done ? 'done' : ''}" onclick="openPage('${p.id}')">${escapeHtml(title)} (${sd.pomos || p.pomoTarget}🍅)</div>`;
+            }
+          });
+        });
+        grid += `<div class="cal-day ${ds === todayStr ? 'today' : ''}"><strong style="font-size:12px;">${d}</strong>${badges}</div>`;
+      }
+
+      container.innerHTML = `
+        <div class="workspace-fluid">
+          <h2 style="font-size:22px;">📅 Calendário — ${months[m]} ${y}</h2>
+          <div class="cal-grid">${grid}</div>
+        </div>
+      `;
+    }
+
+    // ------------------------------------------
+    // FLASHCARD (ESTILO ANKIDROID SM-2)
+    // ------------------------------------------
+    function renderFlashcard(container) {
+      const today = new Date().toISOString().slice(0, 10);
+
+      if (studySession && studySession.queue.length > 0) {
+        const c = studySession.queue[0];
+        const nNew = studySession.queue.filter(x => x.state === 'new').length;
+        const nLearn = studySession.queue.filter(x => x.state === 'learn').length;
+        const nDue = studySession.queue.filter(x => x.state === 'due').length;
+
+        container.innerHTML = `
+          <div class="workspace-fluid">
+            <div class="anki-wrap">
+              <button class="top-pill-btn" onclick="studySession=null; renderApp();">← Voltar aos Baralhos</button>
+              <div class="anki-box">
+                <div style="display:flex;justify-content:space-between;border-bottom:1px solid var(--border);padding-bottom:8px;font-size:13px;">
+                  <div><span class="c-new">${nNew}</span> + <span class="c-learn">${nLearn}</span> + <span class="c-due">${nDue}</span></div>
+                  <span>Flashcard</span>
+                </div>
+                <div style="text-align:center;padding:24px 0;font-size:20px;">
+                  <div>${escapeHtml(c.front)}</div>
+                  ${studySession.show ? `<hr style="margin:18px 0;border:none;border-top:1px dashed #ccc;"><div style="font-size:18px;color:#1f2937;">${escapeHtml(c.back)}</div>` : ''}
+                </div>
+                ${!studySession.show ? `
+                  <button class="btn-pomo-start" style="width:100%;justify-content:center;padding:14px;font-size:14px;" onclick="studySession.show=true; renderApp();">Mostrar Resposta</button>
+                ` : `
+                  <div class="anki-btns">
+                    <button class="anki-btn" style="background:#e03e3e;" onclick="answerCard(1)">Errei<span style="font-size:11px;font-weight:400;">&lt; 1m</span></button>
+                    <button class="anki-btn" style="background:#6b7280;" onclick="answerCard(2)">Difícil<span style="font-size:11px;font-weight:400;">6m</span></button>
+                    <button class="anki-btn" style="background:#0f7b6c;" onclick="answerCard(3)">Bom<span style="font-size:11px;font-weight:400;">1d</span></button>
+                    <button class="anki-btn" style="background:#2383e2;" onclick="answerCard(4)">Fácil<span style="font-size:11px;font-weight:400;">4d</span></button>
+                  </div>
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      let rows = state.decks.map(d => {
+        const dc = state.cards.filter(c => c.deckId === d.id);
+        const nNew = dc.filter(c => c.state === 'new').length;
+        const nLearn = dc.filter(c => c.state === 'learn').length;
+        const nDue = dc.filter(c => c.state === 'due' && c.dueDate <= today).length;
+        const ready = nNew + nLearn + nDue;
+        return `
+          <tr>
+            <td><strong>🗂️ ${escapeHtml(d.name)}</strong></td>
+            <td class="c-new">${nNew}</td>
+            <td class="c-learn">${nLearn}</td>
+            <td class="c-due">${nDue}</td>
+            <td style="text-align:right;">
+              <button class="btn-pomo-start" ${ready === 0 ? 'disabled style="opacity:0.45;"' : ''} onclick="startDeck('${d.id}')">Estudar</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      container.innerHTML = `
+        <div class="workspace-fluid">
+          <div class="anki-wrap">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <h2 style="font-size:22px;">🗂️ Flashcard</h2>
+              <div style="display:flex;gap:8px;">
+                <button class="top-pill-btn" onclick="newDeckPrompt()">+ Baralho</button>
+                <button class="btn-pomo-start" onclick="newCardPrompt()">+ Cartão</button>
+              </div>
+            </div>
+            <table class="anki-table">
+              <thead>
+                <tr><th>Baralho</th><th>Novos</th><th>Aprendendo</th><th>Revisar</th><th style="text-align:right;">Ação</th></tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function newDeckPrompt() {
+      const name = prompt('Nome do baralho:');
+      if (!name || !name.trim()) return;
+      state.decks.push({ id: 'd_' + Date.now(), name: name.trim() });
+      saveState();
+      renderApp();
+    }
+
+    function newCardPrompt() {
+      const deckList = state.decks.map((d, i) => `${i + 1} - ${d.name}`).join('
+');
+      const idx = parseInt(prompt(`Selecione o baralho:
+${deckList}`, '1'), 10) - 1;
+      const deck = state.decks[idx] || state.decks[0];
+      const front = prompt('Frente (Pergunta):');
+      if (!front || !front.trim()) return;
+      const back = prompt('Verso (Resposta):');
+      if (!back || !back.trim()) return;
+      state.cards.push({
+        id: 'c_' + Date.now(),
+        deckId: deck.id,
+        front: front.trim(),
+        back: back.trim(),
+        state: 'new',
+        interval: 0,
+        ease: 2.5,
+        dueDate: new Date().toISOString().slice(0, 10)
+      });
+      saveState();
+      renderApp();
+    }
+
+    function startDeck(deckId) {
+      const today = new Date().toISOString().slice(0, 10);
+      const q = state.cards.filter(c => c.deckId === deckId && (c.state === 'new' || c.state === 'learn' || c.dueDate <= today));
+      if (q.length === 0) return;
+      studySession = { queue: [...q], show: false };
+      renderApp();
+    }
+
+    function answerCard(rating) {
+      const c = studySession.queue.shift();
+      const target = state.cards.find(x => x.id === c.id);
+      if (rating === 1) {
+        target.state = 'learn';
+        target.interval = 0;
+        studySession.queue.push(target);
+      } else {
+        const days = rating === 2 ? 1 : (rating === 3 ? Math.max(1, Math.round((target.interval || 1) * target.ease)) : 4);
+        target.state = 'due';
+        target.interval = days;
+        target.dueDate = new Date(Date.now() + days * 86400000).toISOString().slice(0, 10);
+      }
+      studySession.show = false;
+      saveState();
+      if (studySession.queue.length === 0) {
+        alert('🎉 Revisão concluída!');
+        studySession = null;
+      }
+      renderApp();
+    }
+
+    // ==========================================
+    // BACKUP & RESTAURAR
+    // ==========================================
+    function exportBackup() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `bapo-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+    }
+
+    function importBackup(ev) {
+      const f = ev.target.files[0];
+      if (!f) return;
+      const r = new FileReader();
+      r.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (data && data.pages) {
+            state = data;
+            saveState();
+            renderApp();
+            alert('✅ Backup restaurado!');
+          }
+        } catch (err) {
+          alert('Arquivo inválido.');
+        }
+      };
+      r.readAsText(f);
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+    }
+
+    renderApp();
+  </script>
+</body>
+</html>

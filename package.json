@@ -1,0 +1,14 @@
+{
+  "name": "bapo-workspace",
+  "version": "5.0.0",
+  "description": "BAPO Workspace Desktop (Windows .exe) & Mobile (Android .apk)",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win portable"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  }
+}
